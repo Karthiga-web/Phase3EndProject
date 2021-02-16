@@ -17,7 +17,6 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter{
 	@Autowired
 	MyUserDetailsService userDetailsService;
 	
-	
 	@Bean(name="passwordEncoder")
     public PasswordEncoder passwordencoder(){
      return new BCryptPasswordEncoder();
@@ -38,20 +37,13 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter{
         .antMatchers("/login").permitAll()
         .antMatchers("/decide").permitAll()
         .antMatchers("/register").permitAll()
-//        .antMatchers("/viewTasks").access("hasRole('USER')")
-//        .antMatchers("/updateTask").access("hasRole('USER')")
-//        .antMatchers("/createTask").access("hasRole('USER')")
-//        .antMatchers("/deleteTask").access("hasRole('USER')")
-//        .antMatchers("/welcome").access("hasRole('USER')")
-        .antMatchers("/welcome").permitAll()
-        .antMatchers("/createTask").permitAll()
-        .antMatchers("/viewTasks").permitAll()
-        .antMatchers("/updateTask").permitAll()
-        .antMatchers("/createTask").permitAll()
-        .antMatchers("/deleteTask").permitAll()
-       
-        .antMatchers("/admin/**").hasAuthority("ADMIN").anyRequest()
-        .authenticated().and().csrf().disable().formLogin()
+        .antMatchers("/viewTasks").hasRole("USER")
+        .antMatchers("/updateTask").hasRole("USER")
+        .antMatchers("/createTask").hasRole("USER")
+        .antMatchers("/deleteTask").hasRole("USER")
+        .antMatchers("/welcome").hasRole("USER")
+        .and().csrf().disable()
+        .formLogin()
         .loginPage("/login").failureUrl("/login?error=true")
         .defaultSuccessUrl("/welcome")
         .usernameParameter("userName")

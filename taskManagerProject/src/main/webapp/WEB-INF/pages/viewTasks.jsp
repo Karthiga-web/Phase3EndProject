@@ -46,9 +46,8 @@ tr:nth-child(even) {
 </head>
 <body>
 	<div align="center">
-		<form id="viewTasks"
-			action="/viewTasks"
-			method="post" modelAttribute="viewTasks">
+		<form id="viewTasks" action="/viewTasks" method="post"
+			modelAttribute="viewTasks">
 			<table>
 				<tr>
 					<th>Task Name</th>
@@ -60,9 +59,7 @@ tr:nth-child(even) {
 					<th>Click to Update</th>
 					<th>Click to Delete</th>
 				</tr>
-			</table>
-			<c:forEach var="task" items="${listTasks}">
-				<table>
+				<c:forEach var="task" items="${listTasks}">
 					<tr>
 						<td>${task.taskName}</td>
 						<td>${task.startDate}</td>
@@ -73,8 +70,8 @@ tr:nth-child(even) {
 						<td><a href="updateTask/${task.taskId}">Edit</a></td>
 						<td><a href="deleteTask/${task.taskId}">Delete</a></td>
 					</tr>
-				</table>
-			</c:forEach>
+				</c:forEach>
+			</table>
 			<input type="submit" value="Create Task" />
 		</form>
 	</div>

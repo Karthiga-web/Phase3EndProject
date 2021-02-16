@@ -65,8 +65,11 @@ public class TaskManagerServiceImpl implements TaskManagerService {
 	public UserEntity update(UserEntity user) {
 		user.setPassword(bCryptPasswordEncoder.encode(user.getPassword()));
 		user.setActive(user.getActive());
-		Role userRole = roleRepository.findByRole("USER");
-		user.setRoles(new HashSet<Role>(Arrays.asList(userRole)));
+		user.getRoles().stream().forEach(f->{
+			Role userRole = roleRepository.findByRole(f.getRole());
+			user.setRoles(new HashSet<Role>(Arrays.asList(userRole)));
+		});
+		
 		return userRepository.save(user);
 	}
 
@@ -75,23 +78,12 @@ public class TaskManagerServiceImpl implements TaskManagerService {
 		return taskRepository.save(task);
 	}
 
-//	@Override
-//	public Iterable<TaskEntity> findAllById(Iterable<Integer> userId) {
-//		return taskRepository.findAllById(userId);
-//	}
-
 	@Override
 	public List<TaskEntity> findAllMethod(int userId) {
 		List<TaskEntity> list = taskRepository.findAll();
 		List<TaskEntity> newList = null;
-		for (int i = 0; i < list.size(); i++) {
-//			list.get(i).getUserId()
-//			if(list.get(i).getUserId() == userId) {
-//				newList.add(list.get(i));
-//			}
-		}
-//		list = list.stream().filter(c -> list.contains(c.getUserId())).collect(Collectors.toList());
-		return list;
+		newList = list.stream().filter(employee -> employee.getUserId() == userId).collect(Collectors.toList());
+		return newList;
 	}
 
 	@Override

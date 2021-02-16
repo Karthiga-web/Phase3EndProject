@@ -8,7 +8,7 @@
 </head>
 <body>
 	<div align="center">
-		<form id="login" action="/login"
+		<form id="login" action="login"
 			method="post" modelAttribute="login">
 			<table style="with: 50%">
 				<tr>
