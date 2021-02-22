@@ -16,8 +16,6 @@ public interface TaskManagerService {
 
 	TaskEntity update(TaskEntity user);
 
-//	Iterable<TaskEntity> findAllById(Iterable<Integer> userId);
-
 	List<TaskEntity> findAllMethod(int userId);
 
 	Optional<TaskEntity> findTaskById(int taskId);
@@ -31,5 +29,4 @@ public interface TaskManagerService {
 	Iterable<UserEntity> findAllUsers();
 
 	void findUserById(int userId);
-
 }

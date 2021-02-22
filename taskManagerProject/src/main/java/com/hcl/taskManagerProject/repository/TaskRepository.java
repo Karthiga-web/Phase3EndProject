@@ -9,8 +9,7 @@ import com.hcl.taskManagerProject.entity.TaskEntity;
 
 @Repository
 public interface TaskRepository extends JpaRepository<TaskEntity, Integer> {
-//	List<TaskEntity> findByOwnerOrderByDateDesc(UserEntity user);
-	 Optional<TaskEntity> findByTaskName(String taskName);
+	Optional<TaskEntity> findByTaskName(String taskName);
 
 	void deleteAllByUserId(int userId);
 }

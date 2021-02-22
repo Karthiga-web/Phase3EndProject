@@ -9,7 +9,7 @@
 </head>
 <body>
 	<div align="center">
-	${message }
+		${message }
 		<form id="login" action="login" method="post">
 			<table style="with: 50%">
 				<tr>
@@ -23,9 +23,6 @@
 				<c:if test="${param.error ne null}">
 					<div>Invalid username and password.</div>
 				</c:if>
-<%-- 				<c:if test="${param.logout ne null}"> --%>
-<!-- 					<div>You have been logged out.</div> -->
-<%-- 				</c:if> --%>
 			</table>
 			<input type="submit" value="Login" />
 		</form>
