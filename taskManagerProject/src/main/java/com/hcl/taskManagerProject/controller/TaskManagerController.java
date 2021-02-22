@@ -3,13 +3,18 @@ package com.hcl.taskManagerProject.controller;
 import java.util.List;
 import java.util.Optional;
 
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.authentication.AnonymousAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.web.authentication.logout.SecurityContextLogoutHandler;
 import org.springframework.stereotype.Controller;
+import org.springframework.ui.Model;
 import org.springframework.ui.ModelMap;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.ModelAttribute;
@@ -21,10 +26,10 @@ import org.springframework.web.bind.annotation.RequestParam;
 
 import com.hcl.taskManagerProject.entity.TaskEntity;
 import com.hcl.taskManagerProject.entity.UserEntity;
+import com.hcl.taskManagerProject.exceptions.SaveFailedException;
 import com.hcl.taskManagerProject.service.TaskManagerService;
 
 @Controller
-//@RequestMapping("/taskManager")
 public class TaskManagerController {
 	String currentUserName;
 	int taskId;
@@ -38,7 +43,7 @@ public class TaskManagerController {
 		logger.info("Mapping to index");
 		return "index";
 	}
-	
+
 	@PostMapping("/decide")
 	public String find(@RequestParam(name = "button") String buttonValue) {
 		logger.info("Finding user clicked which button");
@@ -49,25 +54,46 @@ public class TaskManagerController {
 		}
 	}
 
-	@RequestMapping(value = "/login", method = RequestMethod.POST)
-	String login() {
-		logger.info("Mapping to index");
-		return "welcome";
+	@RequestMapping(value = "/login")
+	public String getLoginPage(@RequestParam(name = "error", required = false) String error, Model model,
+			@RequestParam(name = "logout", required = false) String logout) {
+		if (error != null) {
+			model.addAttribute("error", "Invalid Username or Password");
+		}
+		if (logout != null) {
+			model.addAttribute("logout", "You have Successfully Logged Out");
+		}
+		return "login";
 	}
-	
+
+	@RequestMapping(value = "/logout", method = RequestMethod.GET)
+	public String logoutPage(HttpServletRequest request, HttpServletResponse response) {
+		Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+		if (auth != null) {
+			new SecurityContextLogoutHandler().logout(request, response, auth);
+		}
+		return "logout";
+	}
+
 	public int getUserIdMethod() {
 		Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
 		Optional<UserEntity> usercheck = null;
 		if (!(authentication instanceof AnonymousAuthenticationToken)) {
 			String currentUserName = authentication.getName();
-			 usercheck = service.findByUserName(currentUserName);
+			usercheck = service.findByUserName(currentUserName);
 		}
 		return usercheck.get().getUserId();
 	}
 
 	@RequestMapping(value = "/welcome", method = RequestMethod.GET)
-	String welcome1() {
+	String welcome1(ModelMap model) {
 		logger.info("Mapping to index");
+		Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+		if (authentication.getAuthorities().iterator().next().getAuthority().equalsIgnoreCase("ROLE_ADMIN")) {
+			Iterable<UserEntity> users = service.findAllUsers();
+			model.addAttribute("listUsers", users);
+			return "adminWelcome";
+		}
 		return "welcome";
 	}
 
@@ -76,12 +102,12 @@ public class TaskManagerController {
 		logger.info("registration page entered");
 		Optional<UserEntity> usercheck = service.findByUserName(user.getUserName());
 		if (usercheck.isPresent()) {
-			model.addAttribute("message", "User Already Exists");
-			return "/login";
+			model.addAttribute("message", "Username Already Exists!Try a different one!");
+			return "/register";
 		} else {
 			String save = saveMethod(user);
 			if (save.equals("Saved")) {
-				model.addAttribute("message", "User Information Updated");
+				model.addAttribute("message", "User Information Saved");
 				return "/login";
 			} else {
 				model.addAttribute("message", "Error Occured on Registration. Please Try again!");
@@ -117,7 +143,7 @@ public class TaskManagerController {
 		task.setUserId(getUserIdMethod());
 		String save = saveTaskMethod(task);
 		if (save.equals("Saved")) {
-			model.addAttribute("message", "Task saved");
+			model.addAttribute("message", "Task created");
 			return "/welcome";
 		} else {
 			model.addAttribute("message", "Error Occured on Task Save. Please Try again!");
@@ -125,28 +151,36 @@ public class TaskManagerController {
 		}
 	}
 
-	public String saveTaskMethod(TaskEntity user) {
+	public String saveTaskMethod(TaskEntity user) throws SaveFailedException {
 		try {
 			service.update(user);
 			return "Saved";
 		} catch (Exception e) {
-			return "Error";
+			throw new SaveFailedException();
 		}
 	}
 
-//	@RequestMapping("/viewTasks")
-//	public String viewTasks(@ModelAttribute("createTask") TaskEntity task, ModelMap model) {
-//		logger.info("view task page entered");
-//		return null;
-//	}
-	
+	@RequestMapping("/viewTasks")
+	public String viewTasks() {
+		logger.info("Welcome Page Entered");
+		return "welcome";
+	}
+
+	@RequestMapping("/deleteAnotherUser")
+	public String deleteAnotherUser(ModelMap model) {
+		logger.info("Admin Welcome Page Entered");
+		Iterable<UserEntity> users = service.findAllUsers();
+		model.addAttribute("listUsers", users);
+		return "adminWelcome";
+	}
+
 	@GetMapping("/updateTask/{id}")
 	public String updateTask(@PathVariable String id, ModelMap model) {
 		logger.info("update task page entered");
 		taskId = Integer.parseInt(id);
 		Optional<TaskEntity> taskEntity = service.findTaskById(taskId);
 		TaskEntity newTaskEntity = taskEntity.get();
-		if(taskEntity.isPresent()) {
+		if (taskEntity.isPresent()) {
 			model.addAttribute("taskId", newTaskEntity.getTaskId());
 			model.addAttribute("taskName", newTaskEntity.getTaskName());
 			model.addAttribute("startDate", newTaskEntity.getStartDate());
@@ -159,18 +193,18 @@ public class TaskManagerController {
 		} else {
 			List<TaskEntity> tasks = service.findAllMethod(getUserIdMethod());
 			model.addAttribute("listTasks", tasks);
+			model.addAttribute("message", "Task Not found! Error!");
 			return "/viewTasks";
 		}
 	}
-	
+
 	@PostMapping("/updateDone")
 	public String updateDone(@ModelAttribute("updateDone") TaskEntity task, ModelMap model) {
 		logger.info("updateDone entered");
 		TaskEntity newTaskEntity;
 		Optional<TaskEntity> taskEntity = service.findTaskById(task.getTaskId());
 		newTaskEntity = taskEntity.get();
-		if(taskEntity.isPresent()) {
-			
+		if (taskEntity.isPresent()) {
 			newTaskEntity.setDescription(task.getDescription());
 			newTaskEntity.setEmail(task.getEmail());
 			newTaskEntity.setEndDate(task.getEndDate());
@@ -178,14 +212,42 @@ public class TaskManagerController {
 			newTaskEntity.setStartDate(task.getStartDate());
 			newTaskEntity.setTaskId(taskId);
 			newTaskEntity.setUserId(getUserIdMethod());
-			service.saveTask(newTaskEntity);
-			List<TaskEntity> tasks = service.findAllMethod(getUserIdMethod());
-			model.addAttribute("listTasks", tasks);
-			return "/viewTasks";
+			try {
+				service.saveTask(newTaskEntity);
+				List<TaskEntity> tasks = service.findAllMethod(getUserIdMethod());
+				model.addAttribute("listTasks", tasks);
+				model.addAttribute("message", "Task Information Updated");
+				return "/viewTasks";
+			} catch (Exception e) {
+				List<TaskEntity> tasks = service.findAllMethod(getUserIdMethod());
+				model.addAttribute("listTasks", tasks);
+				model.addAttribute("message", "Error occured on Updation!");
+				return "/viewTasks";
+			}
 		} else {
 			List<TaskEntity> tasks = service.findAllMethod(getUserIdMethod());
 			model.addAttribute("listTasks", tasks);
+			model.addAttribute("message", "Task Not found! Error!");
 			return "/viewTasks";
+		}
+	}
+
+	@GetMapping("/deleteUser/{id}")
+	public String deleteUser(@PathVariable String id, ModelMap model) {
+		logger.info("DeleteUserDone entered");
+		int userId;
+		userId = Integer.parseInt(id);
+		try {
+			service.findUserById(userId);
+			Iterable<UserEntity> users = service.findAllUsers();
+			model.addAttribute("listUsers", users);
+			model.addAttribute("message", "User Deleted");
+			return "deleteAnotherUser";
+		} catch (Exception e) {
+			Iterable<UserEntity> users = service.findAllUsers();
+			model.addAttribute("listUsers", users);
+			model.addAttribute("message", "Error occured on Deletion of User!");
+			return "deleteAnotherUser";
 		}
 	}
 
@@ -207,6 +269,7 @@ public class TaskManagerController {
 		} else {
 			List<TaskEntity> tasks = service.findAllMethod(getUserIdMethod());
 			model.addAttribute("listTasks", tasks);
+			model.addAttribute("message", "Task Not found! Error!");
 			return "/viewTasks";
 		}
 	}
@@ -225,14 +288,28 @@ public class TaskManagerController {
 			newTaskEntity.setStartDate(task.getStartDate());
 			newTaskEntity.setTaskId(taskId);
 			newTaskEntity.setUserId(getUserIdMethod());
-			service.deleteTask(newTaskEntity);
-			List<TaskEntity> tasks = service.findAllMethod(getUserIdMethod());
-			model.addAttribute("listTasks", tasks);
-			return "/viewTasks";
+			try {
+				service.deleteTask(newTaskEntity);
+				List<TaskEntity> tasks = service.findAllMethod(getUserIdMethod());
+				model.addAttribute("message", "Task Deleted");
+				model.addAttribute("listTasks", tasks);
+				return "/viewTasks";
+			} catch (Exception e) {
+				List<TaskEntity> tasks = service.findAllMethod(getUserIdMethod());
+				model.addAttribute("listTasks", tasks);
+				model.addAttribute("message", "Error occured on Deletion!");
+				return "/viewTasks";
+			}
 		} else {
 			List<TaskEntity> tasks = service.findAllMethod(getUserIdMethod());
 			model.addAttribute("listTasks", tasks);
+			model.addAttribute("message", "Task Not found! Error!");
 			return "/viewTasks";
 		}
+	}
+
+	@RequestMapping("/403")
+	public String accessdenied() {
+		return "403";
 	}
 }

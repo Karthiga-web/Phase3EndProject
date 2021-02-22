@@ -8,9 +8,8 @@
 </head>
 <body>
 	<div align="center">
-		<form id="createTask"
-			action="/createTask"
-			method="post" modelAttribute="createTask">
+		${message }
+		<form id="createTask" action="/createTask" method="post">
 			<table style="with: 50%">
 				<tr>
 					<td>Task Name</td>
@@ -26,7 +25,8 @@
 				</tr>
 				<tr>
 					<td>Description</td>
-					<td><input type="text" name="description" required /></td>
+					<td><textarea id="description" name="description" rows="4"
+							cols="50"> </textarea></td>
 				</tr>
 				<tr>
 					<td>Email</td>

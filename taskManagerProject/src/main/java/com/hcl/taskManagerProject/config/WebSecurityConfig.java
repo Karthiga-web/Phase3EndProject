@@ -41,17 +41,22 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter{
         .antMatchers("/updateTask").hasRole("USER")
         .antMatchers("/createTask").hasRole("USER")
         .antMatchers("/deleteTask").hasRole("USER")
-        .antMatchers("/welcome").hasRole("USER")
+        .antMatchers("/deleteUser").hasRole("ADMIN")
+        .antMatchers("/adminWelcome").hasRole("ADMIN")
+        .antMatchers("/deleteAnotherUser").hasRole("ADMIN")
+        .antMatchers("/welcome").permitAll()
         .and().csrf().disable()
         .formLogin()
         .loginPage("/login").failureUrl("/login?error=true")
         .defaultSuccessUrl("/welcome")
         .usernameParameter("userName")
         .passwordParameter("password")
-        .and().logout()
+        .and().logout(logout -> logout  
         .logoutRequestMatcher(new AntPathRequestMatcher("/logout"))
-        .logoutSuccessUrl("/login").and().exceptionHandling()
-        .accessDeniedPage("/access-denied");
+        .logoutSuccessUrl("/")                        
+        .invalidateHttpSession(true)                                        
+        ).exceptionHandling()
+        .accessDeniedPage("/403");
 	}
 
 }

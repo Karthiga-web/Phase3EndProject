@@ -28,4 +28,8 @@ public interface TaskManagerService {
 
 	Optional<TaskEntity> findTaskByTaskName(String taskName);
 
+	Iterable<UserEntity> findAllUsers();
+
+	void findUserById(int userId);
+
 }

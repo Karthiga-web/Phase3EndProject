@@ -16,6 +16,7 @@ import org.springframework.stereotype.Service;
 import com.hcl.taskManagerProject.entity.Role;
 import com.hcl.taskManagerProject.entity.TaskEntity;
 import com.hcl.taskManagerProject.entity.UserEntity;
+import com.hcl.taskManagerProject.exceptions.SaveFailedException;
 import com.hcl.taskManagerProject.repository.RoleRepository;
 import com.hcl.taskManagerProject.repository.TaskRepository;
 import com.hcl.taskManagerProject.repository.UserRepository;
@@ -32,24 +33,23 @@ public class TaskManagerServiceImpl implements TaskManagerService {
 	TaskRepository taskRepository;
 
 	BCryptPasswordEncoder bCryptPasswordEncoder;
-	
+
 	@Configuration
-    static class BCryptPasswordEncoderContextConfiguration {
- 
-        @Bean
-        public BCryptPasswordEncoder employeeService() {
-            return new BCryptPasswordEncoder();
-        }
-    }
-	
-	 @Autowired
-	    public TaskManagerServiceImpl(UserRepository userRepository,
-	                       RoleRepository roleRepository,
-	                       BCryptPasswordEncoder bCryptPasswordEncoder) {
-	        this.userRepository = userRepository;
-	        this.roleRepository = roleRepository;
-	        this.bCryptPasswordEncoder = bCryptPasswordEncoder;
-	    }
+	static class BCryptPasswordEncoderContextConfiguration {
+
+		@Bean
+		public BCryptPasswordEncoder employeeService() {
+			return new BCryptPasswordEncoder();
+		}
+	}
+
+	@Autowired
+	public TaskManagerServiceImpl(UserRepository userRepository, RoleRepository roleRepository,
+			BCryptPasswordEncoder bCryptPasswordEncoder) {
+		this.userRepository = userRepository;
+		this.roleRepository = roleRepository;
+		this.bCryptPasswordEncoder = bCryptPasswordEncoder;
+	}
 
 	@Override
 	public boolean existsByUserNameAndPassword(String userName, String password) {
@@ -65,11 +65,11 @@ public class TaskManagerServiceImpl implements TaskManagerService {
 	public UserEntity update(UserEntity user) {
 		user.setPassword(bCryptPasswordEncoder.encode(user.getPassword()));
 		user.setActive(user.getActive());
-		user.getRoles().stream().forEach(f->{
+		user.getRoles().stream().forEach(f -> {
 			Role userRole = roleRepository.findByRole(f.getRole());
 			user.setRoles(new HashSet<Role>(Arrays.asList(userRole)));
 		});
-		
+
 		return userRepository.save(user);
 	}
 
@@ -105,6 +105,22 @@ public class TaskManagerServiceImpl implements TaskManagerService {
 	@Override
 	public Optional<TaskEntity> findTaskByTaskName(String taskName) {
 		return taskRepository.findByTaskName(taskName);
-	};
+	}
 
+	@Override
+	public Iterable<UserEntity> findAllUsers() {
+		Iterable<UserEntity> list = userRepository.findAll();
+		return list;
+	}
+
+	@Override
+	public void findUserById(int userId) {
+		userRepository.deleteById(userId);
+		List<TaskEntity> list = taskRepository.findAll();
+		List<TaskEntity> newList = null;
+		newList = list.stream().filter(employee -> employee.getUserId() == userId).collect(Collectors.toList());
+		newList.stream().forEach(task->{
+			taskRepository.deleteById(task.getTaskId());
+		});
+	}
 }

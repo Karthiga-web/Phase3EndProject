@@ -11,4 +11,6 @@ import com.hcl.taskManagerProject.entity.TaskEntity;
 public interface TaskRepository extends JpaRepository<TaskEntity, Integer> {
 //	List<TaskEntity> findByOwnerOrderByDateDesc(UserEntity user);
 	 Optional<TaskEntity> findByTaskName(String taskName);
+
+	void deleteAllByUserId(int userId);
 }

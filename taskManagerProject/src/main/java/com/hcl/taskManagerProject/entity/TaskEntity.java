@@ -26,7 +26,7 @@ public class TaskEntity {
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	@Column(name = "taskId")
 	int taskId;
-	@Column(name = "taskName")
+	@Column(name = "taskName", nullable = false)
 	String taskName;
 //	@NotNull(message = "{task.date.not.null}")
     @DateTimeFormat(pattern = "yyyy-MM-dd")
@@ -35,12 +35,12 @@ public class TaskEntity {
     @DateTimeFormat(pattern = "yyyy-MM-dd")
 	@Column(name = "endDate")
     LocalDate endDate;
-	@Column(name = "description")
+	@Column(name = "description", nullable = false, length = 3200)
 	String description;
-	@Column(name = "email")
+	@Column(name = "email", nullable = false)
 	String email;
-	@Column(name = "severity")
+	@Column(name = "severity", nullable = false)
 	String severity;
-	@Column(name = "userId")
+	@Column(name = "userId", nullable = false)
 	int userId;
 }

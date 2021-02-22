@@ -30,11 +30,11 @@ public class UserEntity {
 	int userId;
 	@Column(name = "userName", unique=true)
 	String userName;
-	@Column(name = "password")
+	@Column(name = "password", nullable = false)
 	String password;
-	@Column(name = "firstName")
+	@Column(name = "firstName", nullable = false)
 	String firstName;
-	@Column(name = "lastName")
+	@Column(name = "lastName", nullable = false)
 	String lastName;
 	@Column(name = "active")
     Boolean active;

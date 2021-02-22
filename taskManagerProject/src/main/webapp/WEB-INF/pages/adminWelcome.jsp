@@ -5,7 +5,7 @@
 <html>
 <head>
 <meta charset="ISO-8859-1">
-<title>View Tasks</title>
+<title>Welcome Admin !</title>
 <style>
 #ex_table {
 	table-layout: fixed !important;
@@ -46,34 +46,27 @@ tr:nth-child(even) {
 </head>
 <body>
 	<div align="center">
-		${message }
-		<form id="viewTasks" action="/viewTasks" method="post">
+		<form id="deleteuser" action="/deleteUser" method="post">
 			<table>
 				<tr>
-					<th>Task Name</th>
-					<th>Start Date</th>
-					<th>End Date</th>
-					<th>Description</th>
-					<th>Email</th>
-					<th>Severity</th>
-					<th>Click to Update</th>
-					<th>Click to Delete</th>
+					<th>User Id</th>
+					<th>First Name</th>
+					<th>Last Name</th>
+					<th>User Name</th>
+					<th>Activity</th>
 				</tr>
-				<c:forEach var="task" items="${listTasks}">
+				<c:forEach var="task" items="${listUsers}">
 					<tr>
-						<td>${task.taskName}</td>
-						<td>${task.startDate}</td>
-						<td>${task.endDate}</td>
-						<td>${task.description}</td>
-						<td>${task.email}</td>
-						<td>${task.severity}</td>
-						<td><a href="updateTask/${task.taskId}">Edit</a></td>
-						<td><a href="deleteTask/${task.taskId}">Delete</a></td>
+						<td>${task.userId}</td>
+						<td>${task.firstName}</td>
+						<td>${task.lastName}</td>
+						<td>${task.userName}</td>
+						<td>${task.active}</td>
+						<td><a href="deleteUser/${task.userId}">Delete</a></td>
 					</tr>
 				</c:forEach>
 			</table>
-			<a href="<c:url value="/logout"/>">Logout</a> <input type="submit"
-				value="Back to Options Page" />
+			<a href="<c:url value="/logout"/>">Logout</a>
 		</form>
 	</div>
 </body>

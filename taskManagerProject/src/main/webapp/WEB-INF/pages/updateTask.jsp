@@ -8,14 +8,12 @@
 </head>
 <body>
 	<div align="center">
-		<form id="updateDone"
-			action="/updateDone"
-			method="post">
+		${message }
+		<form id="updateDone" action="/updateDone" method="post">
 			<table style="with: 50%">
 				<tr>
 					<td>Task ID</td>
-					<td><input type="text" name="taskId" readonly
-						value=${ taskId}></td>
+					<td><input type="text" name="taskId" readonly value=${ taskId}></td>
 				</tr>
 				<tr>
 					<td>Task Name</td>
@@ -32,17 +30,15 @@
 				</tr>
 				<tr>
 					<td>Description</td>
-					<td><input type="text" name="description"
-						value=${ description}></td>
-				</tr>
+					<td><textarea id="description" name="description" rows="4"
+							cols="50">${ description}</textarea></td>
 				<tr>
 					<td>Email</td>
-					<td><input type="text" name="email" readonly value=${ email}></td>
+					<td><input type="text" name="email" value=${ email}></td>
 				</tr>
 				<tr>
 					<td>Severity</td>
-					<td><select name="severity" id="severity" readonly
-						value=${ severity}>
+					<td><select name="severity" id="severity" readonly value=${ severity}>
 							<option value="${ severity}">${ severity}</option>
 					</select></td>
 				</tr>
